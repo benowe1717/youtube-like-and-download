@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from youtubeDL import youtubeDL
 from youtubeOauth import youtubeOauth
+import time
 
 def main():
 
@@ -25,22 +26,45 @@ def main():
     # and downloading them, we need to be able to "like"
     # each video that we download, to do that we will need
     # an OAuth access token
-    yto = youtubeOauth("like")
+    # yto = youtubeOauth("like")
+    yto = youtubeOauth()
     ytDL.logMsg("Attempting to refresh the access_token...")
-    status = yto.refreshAccessToken()
-    if status is False:
+    # status = yto.refreshAccessToken()
+    if yto.NEW_AUTH:
         ytDL.logMsg("Access token was not refreshed, so we need to get a new one...")
         
         # So the first thing we need to do is get the Device Code, the User Code, 
         # and the Verification URL so that we can work through Youtube's "Device"
         # OAuth authorization flow. This will require manual user intervention
-        codes = yto.requestDeviceAndUserCodes()
-        yto.displayUserCode(codes)
+        # codes = yto.requestDeviceAndUserCodes()
+        # yto.displayUserCode(codes)
+        step1 = yto.requestDeviceAndUserCodes()
+        if step1:
+            yto.displayUserCode()
 
-        # So now we've gotten the codes and displayed them to the user, we need to poll
-        # the authorization server at the given interval to see if the user has authorized
-        # us yet or not
-        yto.pollAuthServer(codes)
+            # So now we've gotten the codes and displayed them to the user, we need to poll
+            # the authorization server at the given interval to see if the user has authorized
+            # us yet or not
+            wait = yto.device_codes[3]
+            time.sleep(wait)
+            step2 = yto.pollAuthServer()
+            while step2 != 200:
+                if step2 == 428:
+                    time.sleep(wait)
+                    step2 = yto.pollAuthServer()
+                elif step2 == 425:
+                    new_wait = wait * 3
+                    time.sleep(new_wait)
+                    step2 = yto.pollAuthServer()
+                else:
+                    exit(1)
+        else:
+            ytDL.logMsg("ERROR: Unable to set up Oauth authorization for this app! Cannot continue!")
+            exit(1)
+    else:
+        refresh = yto.refreshAccessToken()
+        if refresh is False:
+            exit(1)
 
     for creator in content_creators:
         # The first thing that we need to do is get the content creator's
@@ -67,7 +91,7 @@ def main():
             ytDL.logMsg("Found at least one video to download for %s!" % creator)
             ytDL.logMsg("Attempting to download newly released videos...")
             ytDL.downloadVideos()
-            yto.rateVideos()
+            # yto.rateVideos()
         else:
             ytDL.logMsg("No new videos to download for %s! Looks like we're finished here..." % creator)
 
