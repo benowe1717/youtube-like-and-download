@@ -12,8 +12,6 @@ def main():
     logger = youtubeLogger()
     ytDL = youtubeDL()
 
-    ### ONLY UNCOMMENT THIS DURING TROUBLESHOOTING ###
-
     logger.logMsg("Starting script...")
 
     # Now we need to set the list of Content Creators
