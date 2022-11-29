@@ -151,3 +151,18 @@ class youtubeDL:
             self.logMsg("DEBUG: Downloading Video ID: %s..." % i, 1)
             cmd = "/usr/local/bin/yt-dlp --path /home/benjamin/ --no-progress --format 315+140 %s" % url
             os.system(cmd)
+
+    def rateVideos(self, access_token):
+        'This method is used to leave a rating on specific YouTube Video IDs. In our case, we will only be leaving "likes"'
+        # https://developers.google.com/youtube/v3/docs/videos/rate
+        endpoint = "/youtube/v3/videos/rate?"
+        headers = {"Accept": "application/json", "Authorization": ""}
+        headers["Authorization"] = f"Bearer {access_token}"
+        for i in self.to_download:
+            url = self.SCHEME + self.BASE_URL + endpoint + f"id={i}&rating=like&key={self._apikey}"
+            r = requests.post(url=url, headers=headers)
+            if r.status_code == 204:
+                self.logMsg(f"Successfully liked video {i}")
+            else:
+                self.logMsg("ERROR: Unable to leave a rating on the video!")
+                self.logMsg(f"DEBUG: HTTP Response: {r.status_code} :: Access Token: {access_token} :: Video ID: {i} :: Response Text: {r.text}", 1)
