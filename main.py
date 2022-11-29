@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from youtubeDL import youtubeDL
 from youtubeOauth import youtubeOauth
+from youtubeLogger import youtubeLogger
 import time
 
 def main():
@@ -8,12 +9,12 @@ def main():
     # Instantiate the first class
     # This gives us access to the logging class
     # and access to the debug variable
+    logger = youtubeLogger()
     ytDL = youtubeDL()
 
     ### ONLY UNCOMMENT THIS DURING TROUBLESHOOTING ###
-    # ytDL.debug = True
 
-    ytDL.logMsg("Starting script...")
+    logger.logMsg("Starting script...")
 
     # Now we need to set the list of Content Creators
     # that we want to check for new videos from
@@ -26,18 +27,14 @@ def main():
     # and downloading them, we need to be able to "like"
     # each video that we download, to do that we will need
     # an OAuth access token
-    # yto = youtubeOauth("like")
     yto = youtubeOauth()
-    ytDL.logMsg("Attempting to refresh the access_token...")
-    # status = yto.refreshAccessToken()
+    logger.logMsg("Attempting to refresh the access token...")
     if yto.NEW_AUTH:
-        ytDL.logMsg("Access token was not refreshed, so we need to get a new one...")
+        logger.logMsg("Access token was not refreshed, so we need to get a new one...")
         
         # So the first thing we need to do is get the Device Code, the User Code, 
         # and the Verification URL so that we can work through Youtube's "Device"
         # OAuth authorization flow. This will require manual user intervention
-        # codes = yto.requestDeviceAndUserCodes()
-        # yto.displayUserCode(codes)
         step1 = yto.requestDeviceAndUserCodes()
         if step1:
             yto.displayUserCode()
@@ -59,7 +56,7 @@ def main():
                 else:
                     exit(1)
         else:
-            ytDL.logMsg("ERROR: Unable to set up Oauth authorization for this app! Cannot continue!")
+            logger.logMsg("ERROR: Unable to set up Oauth authorization for this app! Cannot continue!")
             exit(1)
     else:
         refresh = yto.refreshAccessToken()
@@ -88,14 +85,14 @@ def main():
         # the to_download list), it's time to download them. But we should only attempt a download if
         # the list has at least one item in it
         if len(ytDL.to_download) >= 1:
-            ytDL.logMsg("Found at least one video to download for %s!" % creator)
-            ytDL.logMsg("Attempting to download newly released videos...")
+            logger.logMsg("Found at least one video to download for %s!" % creator)
+            logger.logMsg("Attempting to download newly released video...")
             ytDL.downloadVideos()
             ytDL.rateVideos(yto._access_token)
         else:
-            ytDL.logMsg("No new videos to download for %s! Looks like we're finished here..." % creator)
+            logger.logMsg("No new videos to download for %s! Looks like we're finished here..." % creator)
 
-    ytDL.logMsg("Script is finished! Bye bye!")
+    logger.logMsg("Script is finished! Bye bye!")
 
 if __name__ == "__main__":
     main()
