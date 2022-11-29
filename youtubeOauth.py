@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 import requests, json
 from urllib.parse import urlencode
+from youtubeLogger import youtubeLogger
 
 class youtubeOauth():
     'This class serves to support the youtubeDL class to get Oauth tokens for the YouTube API'
+
+    # Note that there are no "private" objects or methods in the
+    # Python class structure, but it is generally accepted that
+    # methods and objects with a single "_" (underscore) preceding
+    # the name indicates something "not to be messed with". So I'm
+    # adopting that convention to denote "private" objects and methods
 
     #########################
     ### PRIVATE CONSTANTS ###
@@ -27,6 +34,7 @@ class youtubeOauth():
     _client_secret = ""
     _access_token = ""
     _refresh_token = ""
+    _logger = youtubeLogger() # Bring in our custom logging class to standardize log location and formatting
 
     ######################
     ### PUBLIC OBJECTS ###
@@ -47,16 +55,16 @@ class youtubeOauth():
                 self._client_id = json_data["installed"]["client_id"]
                 self._client_secret = json_data["installed"]["client_secret"]
         except FileNotFoundError:
-            print("ERROR: Unable to locate client_secrets.json file!")
-            print("You either need to download the client_secrets.json file from the Google Cloud console or update the _SECRETS_FILE constant with the appropriate path...")
+            self._logger.logMsg("ERROR: Unable to locate client_secrets.json file!")
+            self._logger.logMsg("You either need to download the client_secrets.json file from the Google Cloud console or update the _SECRETS_FILE constant with the appropriate path...")
             exit(1)
 
         try:
             with open(self._REFRESH_TOKEN_FILE, "r") as file:
                 self._refresh_token = file.readlines()[0]
         except FileNotFoundError:
-            print("ERROR: Unable to locate the refresh_token.txt file!")
-            print("This could be due to this being the first time we are being authorized OR you need to update the _REFRESH_TOKEN_FILE constant with the appropriate path...")
+            self._logger.logMsg("ERROR: Unable to locate the refresh_token.txt file!")
+            self._logger.logMsg("This could be due to this being the first time we are being authorized OR you need to update the _REFRESH_TOKEN_FILE constant with the appropriate path...")
             self.NEW_AUTH = True
             # no exit here as we can just reauth based on what happens
 
@@ -71,12 +79,12 @@ class youtubeOauth():
         endpoint = "/device/code"
         url = self.SCHEME + self.BASE_URL + endpoint
         data = {"client_id": self._client_id, "scope": self.SCOPE}
-        print(f"DEBUG: Calling YouTube API via URL: {url}...")
+        self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}...")
         r = requests.post(url=url, headers=self.headers, data=urlencode(data))
         json_data = json.loads(r.text)
         if r.status_code == 200:
-            print("Successfully retrieved device and user codes!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logMsg("Successfully retrieved device and user codes!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
             # Apparently the .append() method only accepts one argument, and I wanted to
             # try to keep this to one line, so I found this article:
             # https://bobbyhadz.com/blog/python-append-multiple-values-to-list-in-one-line
@@ -84,11 +92,11 @@ class youtubeOauth():
             return True
         elif r.status_code == 403:
             if json_data["error_code"] == "rate_limit_exceeded":
-                print("ERROR: API Quota has been exceeded for this account!")
-                print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+                self._logger.logMsg("ERROR: API Quota has been exceeded for this account!")
+                self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
         else:
-            print("ERROR: Unable to request Device and User Codes!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logMsg("ERROR: Unable to request Device and User Codes!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
             return False
 
     def displayUserCode(self):
@@ -102,29 +110,29 @@ class youtubeOauth():
         endpoint = "/token"
         url = self.SCHEME + self.BASE_URL + endpoint
         data = {"client_id": self._client_id, "client_secret": self._client_secret, "device_code": self.device_codes[0], "grant_type": self.GRANT_TYPE}
-        print(f"DEBUG: Calling YouTube API via URL: {url}...")
+        self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
         r = requests.post(url=url, headers=self.headers, data=urlencode(data))
         json_data = json.loads(r.text)
         if r.status_code == 200:
-            print("User has successfully authorized our application!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logMsg("User has successfully authorized our application!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
             self._access_token = json_data["access_token"]
             self._refresh_token = json_data["refresh_token"]
             self._saveRefreshToken()
             return 200 # This signals the end of use for this method
         elif r.status_code == 428:
-            print(f"User has not completed the authorization flow! Will check again in {self.device_codes[3]} seconds...")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Error: {json_data['error']} :: Error Description: {json_data['error_description']}")
+            self._logger.logMsg(f"User has not completed the authorization flow! Will check again in {self.device_codes[3]} seconds...")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Error: {json_data['error']} :: Error Description: {json_data['error_description']}")
             return 428 # This signals that the method should be used again once the specified interval has passed
         elif r.status_code == 403:
-            print(f"ERROR: {json_data['error']} has occurred! Description: {json_data['error_description']}!")
+            self._logger.logMsg(f"ERROR: {json_data['error']} has occurred! Description: {json_data['error_description']}!")
             if json_data["error"] == "slow_down":
                 return 425 # This signals something has gone wrong with the speed of the requests, try tripling the wait time
             else:
                 return 403 # This signals something has gone wrong with the method and probably isn't recoverable
         else:
-            print(f"ERROR: Unable to contact YouTube API!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logMsg(f"ERROR: Unable to contact YouTube API!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
             return 1 # This signals something has gone wrong with the method and is not recoverable
 
     def refreshAccessToken(self):
@@ -133,15 +141,15 @@ class youtubeOauth():
         endpoint = "/token"
         url = self.SCHEME + self.BASE_URL + endpoint
         data = {"client_id": self._client_id, "client_secret": self._client_secret, "grant_type": "refresh_token", "refresh_token": self._refresh_token}
-        print(f"DEBUG: Calling YouTube API via URL: {url}...")
+        self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
         r = requests.post(url=url, headers=self.headers, data=urlencode(data))
         json_data = json.loads(r.text)
         if r.status_code == 200:
-            print("Successfully refreshed our Access Token!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logMsg("Successfully refreshed our Access Token!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
             self._access_token = json_data["access_token"]
             return True
         else:
-            print("ERROR: Unable to refresh our Access Token or unable to contact the YouTube API!")
-            print(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text} :: Refresh Token: {self._refresh_token}")
+            self._logger.logMsg("ERROR: Unable to refresh our Access Token or unable to contact the YouTube API!")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Refresh Token: {self._refresh_token} :: Response Text: {r.text}")
             return False
