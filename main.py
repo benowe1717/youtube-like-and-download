@@ -91,7 +91,7 @@ def main():
             ytDL.logMsg("Found at least one video to download for %s!" % creator)
             ytDL.logMsg("Attempting to download newly released videos...")
             ytDL.downloadVideos()
-            # yto.rateVideos()
+            ytDL.rateVideos(yto._access_token)
         else:
             ytDL.logMsg("No new videos to download for %s! Looks like we're finished here..." % creator)
 
