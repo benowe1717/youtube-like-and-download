@@ -8,18 +8,9 @@ def main():
 
     # Instantiate the first class
     # This gives us access to the logging class
-    # and access to the debug variable
     logger = youtubeLogger()
-    ytDL = youtubeDL()
 
     logger.logMsg("Starting script...")
-
-    # Now we need to set the list of Content Creators
-    # that we want to check for new videos from
-    # Even if you only want to check for one, just 
-    # put one in this list, we can iterate over one
-    # or many
-    content_creators = ["ChristopherOdd"]
 
     # Before we ge started on checking for videos
     # and downloading them, we need to be able to "like"
@@ -61,34 +52,55 @@ def main():
         if refresh is False:
             exit(1)
 
-    for creator in content_creators:
-        # The first thing that we need to do is get the content creator's
-        # main playlist called "uploads". this allows us to see all of their uploaded
-        # videos, though the request will set a max return value of 5 (and we're ok with that)
+    # Now that we've finished refreshing our Access Token, we need to work on parsing
+    # the config.json file for all of the configured channels and getting that channel's
+    # "uploads" playlistId so we can continue
 
-        # BTW this function doesn't return anything, so no need to
-        # store it's content in a variable
-        ytDL.getUploadsId(creator)
+    # So let's start by instantiating the class
+    ytDL = youtubeDL()
 
-        # Once we have the playlistID for the content creator's "uploads" playlist
-        # we can grab the 5 most recently released videos and get their relevant details
-        # like the publishedAt (release time), resourceId (specific video id), and title
-        ytDL.findVideos()
+    # First thing we need to do is figure out if we already have the channelId saved in
+    # the config file. if we do, then there isn't much to do in this setup. if we don't
+    # then we neeed to start getting those channelIds and saving them for later use
+    ytDL.setup()
 
-        # The details were appended to list objects, so now it's time to loop through them
-        # to see if they're worth downloading or if we need to skip them
-        ytDL.parseVideos()
+    if len(ytDL.search_queue) > 0:
+        logger.logMsg("Starting up the search queries for the missing Channel IDs...")
+        ytDL.getChannelIds()
+        logger.logMsg("Updating the local config file for future iterations...")
+        ytDL.updateConfig()
+    else:
+        logger.logMsg("No search queries needed as we have all Channel IDs saved!")
 
-        # Ok now that we've finished parsing the videos (basically moving the matching videos to
-        # the to_download list), it's time to download them. But we should only attempt a download if
-        # the list has at least one item in it
-        if len(ytDL.to_download) >= 1:
-            logger.logMsg("Found at least one video to download for %s!" % creator)
-            logger.logMsg("Attempting to download newly released video...")
-            ytDL.downloadVideos()
-            ytDL.rateVideos(yto._access_token)
+    # And now that we have the channel's ID, we can get the channel's uploads playlist ID
+    ytDL.requestChannelPlaylistId()
+
+    # If the above went well, then we've updated the ytDL.video_data dictionary with the
+    # channel's "uploads" playlistId. This playlist holds all of the uploaded videos for that channel
+    # regardless of how the video was made or uploaded (live stream, or prerecorded, or shorts). Now
+    # we need to retrieve a recent list of videos in this playlist for each channel
+    ytDL.getRecentVideos()
+
+    # Once this is done, the ytDL.video_data dictionary will once again be updated with all
+    # of the most recent videos for each channel. Now we need to parse each video's publishedAt
+    # date & time + the video's title to see if it is a "new release" and if it matches the configured
+    # "titles" portion of the config.json file
+    ytDL.parseVideos()
+
+    # If we found any matching videos, then the ytDL.download_queue list will be populated with each
+    # of the videoIds that need to be downloaded. So let's check the length of that list. If the length
+    # of the list is greater than 0, then we have work to do. Otherwise, we can safely end the script here
+    queue = len(ytDL.download_queue)
+    if queue > 0:
+        if queue > 1:
+            grammar = "videos"
         else:
-            logger.logMsg("No new videos to download for %s! Looks like we're finished here..." % creator)
+            grammar = "video"
+        logger.logMsg(f"There are {queue} {grammar} to download! Starting the download process now...")
+        ytDL.downloadVideos()
+        ytDL.rateVideos()
+    else:
+        logger.logMsg("There are no videos in the download queue!")
 
     logger.logMsg("Script is finished! Bye bye!")
 
