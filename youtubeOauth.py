@@ -84,7 +84,7 @@ class youtubeOauth():
         json_data = json.loads(r.text)
         if r.status_code == 200:
             self._logger.logMsg("Successfully retrieved device and user codes!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
             # Apparently the .append() method only accepts one argument, and I wanted to
             # try to keep this to one line, so I found this article:
             # https://bobbyhadz.com/blog/python-append-multiple-values-to-list-in-one-line
@@ -93,10 +93,10 @@ class youtubeOauth():
         elif r.status_code == 403:
             if json_data["error_code"] == "rate_limit_exceeded":
                 self._logger.logMsg("ERROR: API Quota has been exceeded for this account!")
-                self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+                self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
         else:
             self._logger.logMsg("ERROR: Unable to request Device and User Codes!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
             return False
 
     def displayUserCode(self):
@@ -115,7 +115,7 @@ class youtubeOauth():
         json_data = json.loads(r.text)
         if r.status_code == 200:
             self._logger.logMsg("User has successfully authorized our application!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
             self._access_token = json_data["access_token"]
             self._refresh_token = json_data["refresh_token"]
             self._saveRefreshToken()
@@ -132,7 +132,7 @@ class youtubeOauth():
                 return 403 # This signals something has gone wrong with the method and probably isn't recoverable
         else:
             self._logger.logMsg(f"ERROR: Unable to contact YouTube API!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
             return 1 # This signals something has gone wrong with the method and is not recoverable
 
     def refreshAccessToken(self):
@@ -146,10 +146,10 @@ class youtubeOauth():
         json_data = json.loads(r.text)
         if r.status_code == 200:
             self._logger.logMsg("Successfully refreshed our Access Token!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Response Text: {json_data}")
             self._access_token = json_data["access_token"]
             return True
         else:
             self._logger.logMsg("ERROR: Unable to refresh our Access Token or unable to contact the YouTube API!")
-            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Refresh Token: {self._refresh_token} :: Response Text: {r.text}")
+            self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Refresh Token: {self._refresh_token} :: Response Text: {json_data}")
             return False
