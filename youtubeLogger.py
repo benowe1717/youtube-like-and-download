@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
-import logging, logging.config, os
+import logging, logging.config, os, sys
 
 class youtubeLogger():
     'This class servers to support the youtubeDL and youtubeOauth classes through standardized log formatting'
@@ -15,6 +15,7 @@ class youtubeLogger():
     ### PRIVATE CONSTANTS ###
     #########################
     _HOSTNAME = os.uname().nodename
+    _PATH = os.path.dirname(os.path.realpath(__file__))
     _PID = os.getpid()
     _PROGRAM = "youtubeDL"
     _TIME_FORMAT = "%b %d %H:%M:%S"
@@ -33,7 +34,8 @@ class youtubeLogger():
     # If you need to specify another configuration file for logging
     # or need to specify another name or different path
     # change the config variable to your named conf file
-    config = "logging.conf"
+    #config = "logging.conf"
+    config = _PATH + "/logging.conf"
     logger = ""
 
     def __init__(self):
