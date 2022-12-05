@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import requests, json
 from urllib.parse import urlencode
 from youtubeLogger import youtubeLogger
+import requests, json, os
 
 class youtubeOauth():
     'This class serves to support the youtubeDL class to get Oauth tokens for the YouTube API'
@@ -15,8 +15,9 @@ class youtubeOauth():
     #########################
     ### PRIVATE CONSTANTS ###
     #########################
-    _SECRETS_FILE = "client_secrets.json"
-    _REFRESH_TOKEN_FILE = "refresh_token.txt"
+    _PATH = os.path.dirname(os.path.realpath(__file__))
+    _SECRETS_FILE = _PATH + "/client_secrets.json"
+    _REFRESH_TOKEN_FILE = _PATH + "/refresh_token.txt"
 
     ########################
     ### PUBLIC CONSTANTS ###
