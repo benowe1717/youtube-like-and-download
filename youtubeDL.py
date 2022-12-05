@@ -226,13 +226,12 @@ class youtubeDL():
         # https://github.com/yt-dlp/yt-dlp
         ii = 1
         base_url = "www.youtube.com"
-        path = os.path.realpath(__file__)
         for i in self.download_queue:
             endpoint = f"/watch?v={i}"
             url = self.SCHEME + base_url + endpoint
             self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
             self._logger.logMsg(f"Staring the download process on video #{ii} through yt-dlp...")
-            cmd = f"{self._YTDLP} --path {path} --no-progress --format bestvideo*+bestaudio/best {url}"
+            cmd = f"{self._YTDLP} --path {self.download_path} --no-progress --format bestvideo*+bestaudio/best {url}"
             self._logger.logDebugMsg(f"DEBUG: Downloading Video ID: {i} with Command: {cmd}")
             os.system(cmd)
             ii += 1
