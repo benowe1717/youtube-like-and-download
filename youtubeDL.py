@@ -15,8 +15,9 @@ class youtubeDL():
     #########################
     ### PRIVATE CONSTANTS ###
     #########################
-    _CONFIG_FILE = "config.json"
-    _CREDS_FILE = ".creds" # This file should store your API Key
+    _PATH = os.path.dirname(os.path.realpath(__file__))
+    _CONFIG_FILE = _PATH + "/config.json"
+    _CREDS_FILE = _PATH + "/.creds" # This file should store your API Key
     _TIME = 3600 # This is used to control how far back in time we should check for "new releases" (if you set this to 3600, then you should only run this script once an hour)
     _YTDLP = "/usr/local/bin/yt-dlp"
 
@@ -39,6 +40,7 @@ class youtubeDL():
     video_data = {}
     download_queue = []
     search_queue = []
+    download_path = _PATH
 
     def __init__(self):
         try:
