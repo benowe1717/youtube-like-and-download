@@ -247,10 +247,10 @@ class youtubeDL():
             url = self.SCHEME + self.BASE_URL + endpoint
             self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
             r = requests.post(url=url, headers=self._headers)
-            json_data = json.loads(r.text)
             if r.status_code == 204:
                 self._logger.logMsg("Successfully left a like on the video!")
             else:
+                json_data = json.loads(r.text)
                 self._logger.logMsg("ERROR: Unable to leave a rating on the video!")
                 self._logger.logDebugMsg(f"DEBUG: HTTP Response Code: {r.status_code} :: Video ID: {i} :: Response Text: {json_data}")
             ii += 1
