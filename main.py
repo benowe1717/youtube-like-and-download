@@ -210,7 +210,7 @@ def main():
             grammar = "video"
         logger.logMsg(f"There are {queue} {grammar} to download! Starting the download process now...")
         ytDL.downloadVideos()
-        ytDL.rateVideos()
+        ytDL.rateVideos(yto._access_token)
     else:
         logger.logMsg("There are no videos in the download queue!")
 
