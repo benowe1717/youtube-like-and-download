@@ -40,6 +40,7 @@ class youtubeDL():
     video_data = {}
     download_queue = []
     search_queue = []
+    download_path = _PATH
 
     def __init__(self):
         try:
