@@ -231,7 +231,7 @@ class youtubeDL():
             url = self.SCHEME + base_url + endpoint
             self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
             self._logger.logMsg(f"Staring the download process on video #{ii} through yt-dlp...")
-            cmd = f"{self._YTDLP} --path {self.download_path} --no-progress --format bestvideo*+bestaudio/best {url}"
+            cmd = f'{self._YTDLP} --path {self.download_path} --no-progress --format "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" --output "%(channel)s - %(title)s.%(ext)s" {url}'
             self._logger.logDebugMsg(f"DEBUG: Downloading Video ID: {i} with Command: {cmd}")
             os.system(cmd)
             ii += 1
