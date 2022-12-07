@@ -230,10 +230,16 @@ class youtubeDL():
             endpoint = f"/watch?v={i}"
             url = self.SCHEME + base_url + endpoint
             self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
-            self._logger.logMsg(f"Staring the download process on video #{ii} through yt-dlp...")
+            self._logger.logMsg(f"Starting the download process on video #{ii} through yt-dlp...")
+            redirect = f">> {self.download_path} 2>&1"
             cmd = f'{self._YTDLP} --path {self.download_path} --no-progress --format "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" --output "%(channel)s - %(title)s.%(ext)s" {url}'
             self._logger.logDebugMsg(f"DEBUG: Downloading Video ID: {i} with Command: {cmd}")
-            os.system(cmd)
+            exit_code = os.system(cmd + redirect)
+            if exit_code == 0:
+                self._logger.logMsg(f"Successfully downloaded video #{ii}!")
+            else:
+                self._logger.logMsg("ERROR: Unable to download the video!")
+                self._logger.logDebugMsg(f"DEBUG: Download Path: {self.download_path} :: URL: {url} :: Exit Code: {exit_code} :: Command: {cmd}")
             ii += 1
 
     def rateVideos(self, access_token):
