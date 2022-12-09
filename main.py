@@ -205,10 +205,10 @@ def main():
     queue = len(ytDL.download_queue)
     if queue > 0:
         if queue > 1:
-            grammar = "videos"
+            grammar = f"There are {queue} videos"
         else:
-            grammar = "video"
-        logger.logMsg(f"There are {queue} {grammar} to download! Starting the download process now...")
+            grammar = f"There is {queue} video"
+        logger.logMsg(f"{grammar} to download! Starting the download process now...")
         ytDL.downloadVideos()
         ytDL.rateVideos(yto._access_token)
     else:
