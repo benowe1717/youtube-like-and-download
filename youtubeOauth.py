@@ -44,11 +44,6 @@ class youtubeOauth():
     # device_codes will always be in device_code, user_code, verification_url, interval order
     device_codes = [] # https://developers.google.com/youtube/v3/guides/auth/devices#step-2:-handle-the-authorization-server-response
 
-
-    # NOTE that all print statements will become
-    # actual log messages once i've rewritten the log method to 
-    # be an actual class
-
     def __init__(self):
         try:
             with open(self._SECRETS_FILE, "r") as file:
