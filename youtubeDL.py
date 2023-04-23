@@ -26,6 +26,8 @@ class youtubeDL():
     ########################
     SCHEME = "https://"
     BASE_URL = "youtube.googleapis.com"
+    VIDEO_FORMAT = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
+    VIDEO_NAME = "%(channel)s - %(title)s.%(ext)s"
 
     #######################
     ### PRIVATE OBJECTS ###
@@ -225,16 +227,18 @@ class youtubeDL():
         'This method is used to download all videos found in the download_queue list using the yt-dlp application (which must be installed ahead of time)'
         # https://github.com/yt-dlp/yt-dlp
         ii = 1
+        cmd = [] # subprocess.run handles commands better as a list of commands and arguments
         base_url = "www.youtube.com"
         for i in self.download_queue:
             endpoint = f"/watch?v={i}"
             url = self.SCHEME + base_url + endpoint
             self._logger.logDebugMsg(f"DEBUG: Calling YouTube API via URL: {url}")
             self._logger.logMsg(f"Starting the download process on video #{ii} through yt-dlp...")
-            cmd = f'{self._YTDLP} --path {self.download_path} --no-progress --format "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]" --output "%(channel)s - %(title)s.%(ext)s" {url}'
+            cmd = [self._YTDLP, "--path", self.download_path, "--no-progress", "--format", self.VIDEO_FORMAT, "--output", self.VIDEO_NAME, url]
             self._logger.logDebugMsg(f"DEBUG: Downloading Video ID: {i} with Command: {cmd}")
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self._logger.logMsg(f"{result.stdout.decode('utf-8')}")
+            self._logger.logDebugMsg(f"DEBUG: {result.stderr.decode('utf-8')}")
             exit_code = result.returncode
             if exit_code == 0:
                 self._logger.logMsg(f"Successfully downloaded video #{ii}!")
