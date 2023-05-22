@@ -26,7 +26,7 @@ class youtubeDL():
     ########################
     SCHEME = "https://"
     BASE_URL = "youtube.googleapis.com"
-    VIDEO_FORMAT = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
+    VIDEO_FORMAT = "bv*[ext=webm]+ba[ext=m4a]/b[ext=webm]"
     VIDEO_NAME = "%(channel)s - %(title)s.%(ext)s"
 
     #######################
