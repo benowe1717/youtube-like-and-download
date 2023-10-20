@@ -27,3 +27,13 @@ UPDATE_TYPES = [
     "u", "o", "update", "overwrite"
 ]
 ###
+
+### youtube_oauth ###
+OAUTH_BASE_URL = "https://oauth2.googleapis.com"
+OAUTH_SCOPE = "https://www.googleapis.com/auth/youtube"
+OAUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
+###
+
+### youtube_dl ###
+DL_BASE_URL = "https://youtube.googleapis.com"
+###

@@ -1,2 +1,4 @@
 __pycache__/
 *.log
+client_secrets.json
+refresh_token.json

@@ -3,6 +3,7 @@ import constants
 from parseargs import arg_parse
 from logger import youtube_logger
 from configurator import youtube_configurator
+from auth import youtube_oauth
 import random, string, sys
 
 def main():
@@ -127,16 +128,17 @@ def main():
 
             print("Channel name successfully removed!")
 
-    elif action == "test":
+    elif myparser.action == "test":
+        myauth = youtube_oauth()
+        myauth.test_api()
+
+    elif myparser.action == "video":
         pass
 
-    elif action == "video":
+    elif myparser.action == "playlist":
         pass
 
-    elif action == "playlist":
-        pass
-
-    elif action == "search":
+    elif myparser.action == "search":
         pass
 
     logger.logger.info("Script finished!")
