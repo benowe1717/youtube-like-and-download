@@ -42,22 +42,47 @@ class youtube_configurator():
 
 
     def add_channel(self, name, id, titles=None):
-        if id in self.config['channels'].keys():
-            print(
-                "This YouTube Channel is already configured! Please",
-                "use the -c/--config update command instead!"
-            )
-        if titles:
-            self.config['channels'][id] = {
-                'channel_name': name,
-                'channel_titles': titles
-            }
+        try:
+            if id in self.config['channels'].keys():
+                print(
+                    "This YouTube Channel is already configured! Please",
+                    "use the -c/--config update command instead!"
+                )
 
-        else:
-            self.config['channels'][id] = {
-                'channel_name': name,
-                'channel_titles': None
-            }
+            if titles:
+                self.config['channels'][id] = {
+                    'channel_name': name,
+                    'channel_titles': titles
+                }
+
+            else:
+                self.config['channels'][id] = {
+                    'channel_name': name,
+                    'channel_titles': None
+                }
+        except AttributeError:
+            # AttributeError: 'NoneType' object has no attriute 'keys'
+            # This happens if there are no channels configured yet,
+            # this is fine
+            if titles:
+                self.config = {
+                    'channels': {
+                        id: {
+                            'channel_name': name,
+                            'channel_titles': titles
+                        }
+                    }
+                }
+
+            else:
+                self.config = {
+                    'channels': {
+                        id: {
+                            'channel_name': name,
+                            'channel_titles': None
+                        }
+                    }
+                }
 
         with open(self.conf, "w") as file:
             yaml.dump(self.config, file)
@@ -76,8 +101,21 @@ class youtube_configurator():
 
     def update_channel(self, id, titles, update_type):
         if update_type == "update" or update_type == "u":
-            for title in titles:
-                self.config['channels'][id]['channel_titles'].append(title)
+            if isinstance(
+                self.config['channels'][id]['channel_titles'], list
+            ):
+                for title in titles:
+                    self.config['channels'][id]['channel_titles'].append(title)
+
+            else:
+                title_list = []
+                title_list.append(
+                    self.config['channels'][id]['channel_titles']
+                )
+                for title in titles:
+                    title_list.append(title)
+
+                self.config['channels'][id]['channel_titles'] = title_list
 
         elif update_type == "overwrite" or update_type == "o":
             self.config['channels'][id]['channel_titles'] = titles

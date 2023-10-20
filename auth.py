@@ -152,7 +152,7 @@ class youtube_oauth():
         endpoint = "/token"
         url = f"{self.BASE_URL}{endpoint}"
         payload = {
-            "client_d": self.__client_id,
+            "client_id": self.__client_id,
             "client_secret": self.__client_secret,
             "refresh_token": self.__refresh_token['refresh_token'],
             "grant_type": "refresh_token"

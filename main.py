@@ -4,6 +4,7 @@ from parseargs import arg_parse
 from logger import youtube_logger
 from configurator import youtube_configurator
 from auth import youtube_oauth
+from youtube_api import youtube_api
 import random, string, sys
 
 def main():
@@ -20,6 +21,7 @@ def main():
         action = myparser.config_action
 
         if action == "add":
+            myapi = youtube_api()
             needle = input(
                 "Enter the Youtube Channel Name or URL: "
             )
@@ -28,14 +30,6 @@ def main():
                 "want to filter for [Leave blank for no filter]: "
             )
 
-            # TODO --> Search YouTube API for given `needle`
-            # Get the actual Name and ID and pass that to the config
-            id = "".join(
-                random.choices(
-                    string.ascii_uppercase + string.digits +
-                    "_" + string.ascii_lowercase, k=25
-                )
-            )
             if "http" in needle:
                 url = needle.split("/")
                 name = url[-1]
@@ -43,8 +37,13 @@ def main():
                     url.pop(-1)
                     name = url[-1]
 
+                if "@" in name:
+                    name = name.split("@")[-1]
+
             else:
                 name = needle
+
+            id = myapi.get_channel_id(name)
 
             if titles:
                 title_list = myconf.split_titles(titles)

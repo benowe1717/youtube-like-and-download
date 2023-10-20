@@ -4,7 +4,7 @@
 PROGRAM_NAME = "main.py"
 PROGRAM_DESCRIPTION = """A program to identify, 
 like, and download videos from YouTube"""
-VERSION = "0.1.0"
+VERSION = "0.1.2"
 AUTHOR = "Benjamin Owen"
 REPO = "https://github.com/benowe1717/youtube-like-and-download"
 
