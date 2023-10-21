@@ -138,7 +138,14 @@ def main():
         pass
 
     elif myparser.action == "search":
-        pass
+        myconf = youtube_configurator()
+        for key, value in myconf.config['channels'].items():
+            id = key
+            titles = value['channel_titles']
+
+            myapi = youtube_api()
+            myapi.download_path = myparser.download_path
+            myapi.search_videos(id, myparser.hours, titles)
 
     logger.logger.info("Script finished!")
 

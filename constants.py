@@ -36,4 +36,7 @@ OAUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
 
 ### youtube_dl ###
 DL_BASE_URL = "https://youtube.googleapis.com"
+YTDLP = "/usr/local/bin/yt-dlp"
+VIDEO_FORMAT = "bv*[ext=webm]+ba[ext=m4a]/b[ext=webm]"
+VIDEO_NAME = "%(channel)s - %(title)s.%(ext)s"
 ###

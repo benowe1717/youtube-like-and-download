@@ -167,7 +167,7 @@ class youtube_oauth():
             )
             data = json.loads(r.text)
             self.__refresh_token['access_token'] = data['access_token']
-            self.update_expiration()
+            self.update_expiration(data['expires_in'])
             with open(self.__refresh_token_file, "w") as file:
                 json.dump(self.__refresh_token, file)
 
@@ -203,9 +203,9 @@ class youtube_oauth():
             )
             return False
 
-    def update_expiration(self):
+    def update_expiration(self, new_time):
         now = time.time()
-        expires_in = now + self.__refresh_token['expires_in']
+        expires_in = now + new_time
         self.__refresh_token['expires_in'] = expires_in
 
     def is_expired(self):

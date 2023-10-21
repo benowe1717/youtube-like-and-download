@@ -89,7 +89,7 @@ class arg_parse():
 
             else:
                 self.action = "video"
-                self.download_path = self.args.download_path
+                self.download_path = self.args.download_path[0]
                 self.target = self.args.video
 
         if self.args.playlist:
@@ -98,7 +98,7 @@ class arg_parse():
 
             else:
                 self.action = "playlist"
-                self.download_path = self.args.download_path
+                self.download_path = self.args.download_path[0]
                 self.target = self.args.playlist
 
         if self.args.config:
@@ -113,8 +113,13 @@ class arg_parse():
                 )
 
         if self.args.search:
-            self.action = "search"
-            self.hours = self.args.search[0]
+            if self.args.download_path is None:
+                self.parser.error("--search requires --download-path")
+
+            else:
+                self.action = "search"
+                self.hours = int(self.args.search[0])
+                self.download_path = self.args.download_path[0]
 
     def printVersion(self):
         """

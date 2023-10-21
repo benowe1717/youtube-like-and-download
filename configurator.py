@@ -12,7 +12,7 @@ class youtube_configurator():
     ### PUBLIC OBJECTS ###
     ######################
     conf = "config.yaml"
-    config = ""
+    config = {}
     logger = ""
 
     def __init__(self):
@@ -39,7 +39,6 @@ class youtube_configurator():
                 i += 1
             return title_list
         return False
-
 
     def add_channel(self, name, id, titles=None):
         try:
