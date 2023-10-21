@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import constants
-import argparse
+import argparse, os
 
 class arg_parse():
     """
@@ -89,7 +89,7 @@ class arg_parse():
 
             else:
                 self.action = "video"
-                self.download_path = self.args.download_path[0]
+                self.download_path = os.path.join(self.args.download_path[0], "")
                 self.target = self.args.video
 
         if self.args.playlist:
@@ -98,7 +98,7 @@ class arg_parse():
 
             else:
                 self.action = "playlist"
-                self.download_path = self.args.download_path[0]
+                self.download_path = os.path.join(self.args.download_path[0], "")
                 self.target = self.args.playlist
 
         if self.args.config:
@@ -119,7 +119,7 @@ class arg_parse():
             else:
                 self.action = "search"
                 self.hours = int(self.args.search[0])
-                self.download_path = self.args.download_path[0]
+                self.download_path = os.path.join(self.args.download_path[0], "")
 
     def printVersion(self):
         """
