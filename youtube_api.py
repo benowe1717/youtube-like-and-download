@@ -69,6 +69,11 @@ class youtube_api():
                             channel_id = i['id']['channelId']
                             return channel_id
 
+                        # TODO --> Add in a partial match feature
+                        # Reference GeminiTayMC vs GeminiTay
+                        # Reference ThatMumboJumbo vs Mumbo Jumbo
+                        # Reference TangoTekLP vs Tango Tek
+
                 if "nextPageToken" in response.keys():
                     next = response['nextPageToken']
                     endpoint = f"{endpoint}&nextPageToken={next}"
@@ -212,8 +217,6 @@ class youtube_api():
             constants.YTDLP, "--path", self.download_path, "--no-progress",
             "--format", self.FORMAT, "--output", self.NAME, id
         ]
-        print(cmd)
-        exit(1)
         result = subprocess.run(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
