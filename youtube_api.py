@@ -217,13 +217,23 @@ class youtube_api():
             constants.YTDLP, "--path", self.download_path, "--no-progress",
             "--format", self.FORMAT, "--output", self.NAME, id
         ]
+        self.logger.logger.debug(
+            f"Running command {cmd} to download the video..."
+        )
         result = subprocess.run(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         if result.returncode == 0:
+            self.logger.logger.debug(
+                f"Command ran successfully! Output: {result.stdout}"
+            )
             return True
 
         else:
+            self.logger.logger.debug(
+                f"Command failed! Output: {result.stdout} :: " +
+                f"Error: {result.stderr}"
+            )
             return False
 
     def like_video(self, id):
