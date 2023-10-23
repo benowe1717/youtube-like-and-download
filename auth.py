@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import constants
-from logger import youtube_logger
 from urllib.parse import urlencode
-import json, os, requests, time, yaml
+import json, logging, os, requests, time, yaml
 
 class youtube_oauth():
     """
@@ -39,7 +38,7 @@ class youtube_oauth():
     logger = ""
 
     def __init__(self):
-        self.logger = youtube_logger()
+        self.logger = logging.getLogger(constants.NAME)
 
         try:
             with open(self.__client_secrets_file, "r") as file:
