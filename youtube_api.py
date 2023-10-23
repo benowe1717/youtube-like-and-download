@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import constants
-from logger import youtube_logger
 from auth import youtube_oauth
 from datetime import datetime
-import json, os, requests, subprocess, time
+import json, logging, os, requests, subprocess, time
 
 class youtube_api():
     """
@@ -37,12 +36,12 @@ class youtube_api():
     download_path = "~/Videos"
 
     def __init__(self):
-        self.logger = youtube_logger()
+        self.logger = logging.getLogger(constants.NAME)
         myauth = youtube_oauth()
 
         if not os.path.exists(constants.YTDLP):
             print(f"ERROR: Unable to locate yt-dlp at {constants.YTDLP}")
-            self.logger.logger.error(
+            self.logger.error(
                 f"ERROR: Unable to locate yt-dlp at {constants.YTDLP}"
             )
             exit(1)
@@ -102,97 +101,97 @@ class youtube_api():
         exit(1)
 
     def search_videos(self, id, hours, titles=None):
-        self.logger.logger.info(
+        self.logger.info(
             "Retrieving channel's Playlist ID..."
         )
         playlist_id = self.get_playlist_id(id)
         if not playlist_id:
-            self.logger.logger.error(
+            self.logger.error(
                 "Unable to find channel's Playlist ID!"
             )
             return False
 
-        self.logger.logger.info(
+        self.logger.info(
             "Channel's Playlist ID retrieved successfully!"
         )
-        self.logger.logger.info(
+        self.logger.info(
             "Retrieving channel's Playlist ID..."
         )
         videos = self.get_videos_in_playlist(playlist_id)
         if not videos:
-            self.logger.logger.error(
+            self.logger.error(
                 "Unable to get videos from channel's uploads playlist!"
             )
             return False
 
-        self.logger.logger.info(
+        self.logger.info(
             "Parsing videos from uploads playlist..."
         )
         for video in videos:
             published_at = video['published_at']
-            self.logger.logger.info(
+            self.logger.info(
                 "Checking if video was released within the given timeframe..."
             )
             new_release = self.is_new_release(hours, published_at)
             if new_release:
-                self.logger.logger.info(
+                self.logger.info(
                     "Video was released within the given timeframe!"
                 )
                 
                 if titles:
-                    self.logger.logger.info(
+                    self.logger.info(
                         "Checking if video title matches the given title list..."
                     )
                     title_match = self.does_video_match(video['title'], titles)
 
                     if title_match:
-                        self.logger.logger.info(
+                        self.logger.info(
                             "Video title matches!"
                         )
 
                     else:
-                        self.logger.logger.info(
+                        self.logger.info(
                             "Video title does not match the given titles!"
                         )
                         break
 
-                self.logger.logger.info(
+                self.logger.info(
                     "Dropping a like on the video..."
                 )
                 result = self.like_video(video['video_id'])
                 i = 1
                 while not result:
-                    self.logger.logger.error(
+                    self.logger.error(
                         "ERROR: Unable to leave a like on the video!"
                     )
                     i += 1
                     result = self.like_video(video['video_id'])
-                    self.logger.logger.info(
+                    self.logger.info(
                         f"Attempt #{i} of leaving a like..."
                     )
                     if i == 5:
-                        self.logger.logger.error(
+                        self.logger.error(
                             "ERROR: Unable to leave a like on the " +
                             "video after 5 attempts!"
                         )
                         break
 
-                self.logger.logger.info(
+                self.logger.info(
                     "Liked the video successfully!"
                 )
-                self.logger.logger.info(
+                self.logger.info(
                     "Downloading the video..."
                 )
                 result = self.download_video(video['video_id'])
                 i = 1
                 while not result:
-                    self.logger.logger.error(
+                    self.logger.error(
                         "ERROR: Unable to download the video!"
                     )
                     i += 1
                     result = self.download_video(video['video_id'])
                     if i == 5:
-                        self.logger.logger.error(
+                        self.logger.error(
                             "ERROR: Unable to leave a like on the " +
                             "video after 5 attempts! You should " +
                             "download the video manually: " +
@@ -200,12 +199,12 @@ class youtube_api():
                         )
                         break
 
-                self.logger.logger.info(
+                self.logger.info(
                     "Downloaded the video successfully!"
                 )
 
             else:
-                self.logger.logger.info(
+                self.logger.info(
                     "Video was not released within the given timeframe!"
                 )
 
@@ -217,20 +216,20 @@ class youtube_api():
             constants.YTDLP, "--path", self.download_path, "--no-progress",
             "--format", self.FORMAT, "--output", self.NAME, id
         ]
-        self.logger.logger.debug(
+        self.logger.debug(
             f"Running command {cmd} to download the video..."
         )
         result = subprocess.run(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         if result.returncode == 0:
-            self.logger.logger.debug(
+            self.logger.debug(
                 f"Command ran successfully! Output: {result.stdout}"
             )
             return True
 
         else:
-            self.logger.logger.debug(
+            self.logger.debug(
                 f"Command failed! Output: {result.stdout} :: " +
                 f"Error: {result.stderr}"
             )
@@ -239,7 +238,7 @@ class youtube_api():
     def like_video(self, id):
         endpoint = f"/youtube/v3/videos/rate?id={id}&rating=like"
         url = f"{self.BASE_URL}{endpoint}"
-        self.logger.logger.debug(
+        self.logger.debug(
             "DEBUG Calling YouTube API to like the video..." +
             f"Video ID: {id} :: URL: {url} :: Headers: {self.__headers}"
         )
@@ -247,14 +246,14 @@ class youtube_api():
             url=url, headers=self.__headers
         )
         if r.status_code == 204:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Successfully contacted the YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
             return True
 
         else:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Error contacting YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
@@ -263,7 +262,7 @@ class youtube_api():
     def get_playlist_id(self, id):
         endpoint = f"/youtube/v3/channels?part=contentDetails&id={id}"
         url = f"{self.BASE_URL}{endpoint}"
-        self.logger.logger.debug(
+        self.logger.debug(
             "DEBUG Calling YouTube API to retrieve the Playlist ID... " +
             f"Channel ID: {id} :: URL: {url} :: Headers: {self.__headers}"
         )
@@ -271,7 +270,7 @@ class youtube_api():
             url=url, headers=self.__headers
         )
         if r.status_code == 200:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Successfully contacted YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
@@ -281,7 +280,7 @@ class youtube_api():
             return playlist_id
 
         else:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Error contacting YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
@@ -292,7 +291,7 @@ class youtube_api():
         endpoint = "/youtube/v3/playlistItems?part=snippet&maxResults=10"
         endpoint = endpoint + f"&playlistId={id}"
         url = f"{self.BASE_URL}{endpoint}"
-        self.logger.logger.debug(
+        self.logger.debug(
             "DEBUG Calling YouTube API to retrieve videos in the " +
             f"uploads playlist... Channel ID: {id} :: URL: {url} " +
             f":: Headers: {self.__headers}"
@@ -301,7 +300,7 @@ class youtube_api():
             url=url, headers=self.__headers
         )
         if r.status_code == 200:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Successfully contacted YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
@@ -319,7 +318,7 @@ class youtube_api():
             return videos
 
         else:
-            self.logger.logger.debug(
+            self.logger.debug(
                 "DEBUG Error contacting YouTube API! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
@@ -328,16 +327,16 @@ class youtube_api():
     def does_video_match(self, video_title, titles):
         for i in titles:
             title = i.lower()
-            self.logger.logger.debug(
+            self.logger.debug(
                 f"DEBUG Checking to see if {title} matches " +
                 f"{video_title.lower()}..."
             )
             if title in video_title.lower():
-                self.logger.logger.debug(
+                self.logger.debug(
                     f"DEBUG Found a matching title!"
                 )
                 return True
-        self.logger.logger.debug(
+        self.logger.debug(
             "DEBUG No video titles matched the configured titles!"
         )
         return False

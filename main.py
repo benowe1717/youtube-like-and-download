@@ -1,20 +1,43 @@
 #!/usr/bin/env python3
 import constants
 from parseargs import arg_parse
-from logger import youtube_logger
 from configurator import youtube_configurator
 from auth import youtube_oauth
 from youtube_api import youtube_api
-import random, string, sys
+from datetime import datetime
+import logging, logging.config, os, re, sys
 
 def main():
+    hostname = os.uname().nodename
+    pid = os.getpid()
+    logger_conf = "logging.conf"
+    if not os.path.exists(logger_conf):
+        print(f"ERROR: Unable to locate {logger_conf}!")
+        exit(1)
+
+    logging.config.fileConfig(logger_conf)
+    old_factory = logging.getLogRecordFactory()
+
+    def record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        record.event_date = datetime.now().strftime(constants.TIME_FORMAT)
+        record.hostname = os.uname().nodename
+        record.program = constants.NAME
+        record.pid = os.getpid()
+        return record
+
+    logging.setLogRecordFactory(record_factory)
+    logger = logging.getLogger(constants.NAME)
+
     args = sys.argv
     myparser = arg_parse(args)
     debug = myparser.debug
-    logger = youtube_logger()
 
-    logger.logger.info("Starting script...")
-    logger.logger.debug("DEBUG logging has been enabled...")
+    if debug:
+        logger.setLevel("DEBUG")
+
+    logger.info("Starting script...")
+    logger.debug("DEBUG logging has been enabled...")
 
     if myparser.action == "config":
         myconf = youtube_configurator()
@@ -132,7 +155,19 @@ def main():
         myauth.test_api()
 
     elif myparser.action == "video":
-        pass
+        for video in myparser.target:
+            pattern = r"^http(s).*?\=(?P<id>\S+)$"
+            matches = re.match(pattern, video)
+            if matches:
+                id = matches["id"]
+
+            else:
+                id = video
+
+            myapi = youtube_api()
+            myapi.download_path = myparser.download_path
+            myapi.like_video(id)
+            myapi.download_video(id)
 
     elif myparser.action == "playlist":
         pass
