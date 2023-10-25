@@ -47,7 +47,7 @@ class youtube_oauth():
                 self.__client_secret = json_data['installed']['client_secret']
         except FileNotFoundError:
             print(f"ERROR: Unable to open {self.__client_secrets_file}")
-            self.logger.logger.error(
+            self.logger.error(
                 f"ERROR: Unable to open {self.__client_secrets_file}"
             )
             exit(1)
@@ -64,7 +64,7 @@ class youtube_oauth():
                 "There is no access token on file, starting up the",
                 "normal login process..."
             )
-            self.logger.logger.info(
+            self.logger.info(
                 "There is no access token on file, starting up the " +
                 "normal login process..."
             )
@@ -74,7 +74,7 @@ class youtube_oauth():
             print(
                 "The access token is expired! Refreshing the token..."
             )
-            self.logger.logger.info(
+            self.logger.info(
                 "The access token is expired! Refreshing the token..."
             )
             self.refresh_access_token()
@@ -161,7 +161,7 @@ class youtube_oauth():
         )
         if r.status_code == 200:
             print("Access token successfully refreshed!")
-            self.logger.logger.info(
+            self.logger.info(
                 "Access token successfully refreshed!"
             )
             data = json.loads(r.text)
@@ -175,7 +175,7 @@ class youtube_oauth():
                 "Unable to refresh the access token!",
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
-            self.logger.logger.error(
+            self.logger.error(
                 "Unable to refresh the access token! " +
                 f"Status Code: {r.status_code} :: Details: {r.text}"
             )
