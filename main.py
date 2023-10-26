@@ -10,7 +10,8 @@ import logging, logging.config, os, re, sys
 def main():
     hostname = os.uname().nodename
     pid = os.getpid()
-    logger_conf = "logging.conf"
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    logger_conf = f"{base_path}/logging.conf"
     if not os.path.exists(logger_conf):
         print(f"ERROR: Unable to locate {logger_conf}!")
         exit(1)
@@ -182,7 +183,7 @@ def main():
             myapi.download_path = myparser.download_path
             myapi.search_videos(id, myparser.hours, titles)
 
-    logger.logger.info("Script finished!")
+    logger.info("Script finished!")
 
 if __name__ == "__main__":
     main()
