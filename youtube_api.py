@@ -286,10 +286,13 @@ class youtube_api():
             )
             return False
 
-    def get_videos_in_playlist(self, id):
+    def get_videos_in_playlist(self, id, next_page=None):
         videos = []
         endpoint = "/youtube/v3/playlistItems?part=snippet&maxResults=10"
         endpoint = endpoint + f"&playlistId={id}"
+        if next_page:
+            endpoint = endpoint + f"&pageToken={next_page}"
+            
         url = f"{self.BASE_URL}{endpoint}"
         self.logger.debug(
             "DEBUG Calling YouTube API to retrieve videos in the " +
@@ -306,13 +309,20 @@ class youtube_api():
             )
             data = json.loads(r.text)
             for i in data['items']:
+                video_data = {}
                 published_at = i['snippet']['publishedAt']
                 video_id = i['snippet']['resourceId']['videoId']
                 title = i['snippet']['title']
+                video_data.update({
+                    'published_at': published_at,
+                    'video_id': video_id,
+                    'title': title
+                })
+                videos.append(video_data)
+
+            if "nextPageToken" in data.keys():
                 videos.append({
-                    "published_at": published_at,
-                    "video_id": video_id,
-                    "title": title
+                    'next_page': data['nextPageToken']
                 })
 
             return videos

@@ -171,7 +171,41 @@ def main():
             myapi.download_video(id)
 
     elif myparser.action == "playlist":
-        pass
+        for playlist in myparser.target:
+            pattern = r"http(s).*?\=(?P<id>\S+)$"
+            matches = re.match(pattern, playlist)
+            if matches:
+                id = matches["id"]
+
+            else:
+                id = playlist
+
+        video_list = []
+        myapi = youtube_api()
+        videos = myapi.get_videos_in_playlist(id)
+        for video in videos:
+            video_list.append(video['video_id'])
+
+        if "next_page" in videos[-1].keys():
+            next_page = videos[-1]['next_page']
+
+        else:
+            next_page = -1
+
+        while next_page != -1:
+            videos = myapi.get_videos_in_playlist(id, next_page)
+            for video in videos:
+                video_list.append(video['video_id'])
+
+            if "next_page" in videos[-1].keys():
+                next_page = videos[-1]['next_page']
+
+            else:
+                next_page = -1
+
+        for id in video_list:
+            myapi.like_video(id)
+            myapi.download_video(id)
 
     elif myparser.action == "search":
         myconf = youtube_configurator()
