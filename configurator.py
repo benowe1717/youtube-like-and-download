@@ -11,13 +11,14 @@ class youtube_configurator():
     ######################
     ### PUBLIC OBJECTS ###
     ######################
-    conf = "config.yaml"
+    base_path = os.path.dirname(os.path.realpath(__file__))
+    conf = f"{base_path}/config.yaml"
     config = {}
     logger = ""
 
     def __init__(self):
         if not os.path.exists(self.conf):
-            print(f"ERROR: Unable to locate {self.logger_conf}!")
+            print(f"ERROR: Unable to locate {self.conf}!")
             exit(1)
 
         self.logger = logging.getLogger(constants.NAME)
