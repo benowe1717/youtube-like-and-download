@@ -25,8 +25,8 @@ class youtube_oauth():
     __refresh_token = {}
     __device_code = ""
     __interval = -1
-    __client_secrets_file = f"{self.base_path}/client_secrets.json"
-    __refresh_token_file = f"{self.base_path}/refresh_token.json"
+    __client_secrets_file = f"{base_path}/client_secrets.json"
+    __refresh_token_file = f"{base_path}/refresh_token.json"
     __headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json"
