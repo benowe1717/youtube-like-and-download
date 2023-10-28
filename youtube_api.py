@@ -132,6 +132,9 @@ class youtube_api():
             "Parsing videos from uploads playlist..."
         )
         for video in videos:
+            if "next_page" in video.keys():
+                continue
+            
             published_at = video['published_at']
             self.logger.info(
                 "Checking if video was released within the given timeframe..."
