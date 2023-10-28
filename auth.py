@@ -25,8 +25,10 @@ class youtube_oauth():
     __refresh_token = {}
     __device_code = ""
     __interval = -1
-    __client_secrets_file = f"{base_path}/client_secrets.json"
-    __refresh_token_file = f"{base_path}/refresh_token.json"
+    __client_secrets_filename = "/client_secrets.json"
+    __refresh_token_filename = "/refresh_token.json"
+    __client_secrets_file = ""
+    __refresh_token_file = ""
     __headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json"
@@ -40,6 +42,10 @@ class youtube_oauth():
 
     def __init__(self):
         self.logger = logging.getLogger(constants.NAME)
+        self.__client_secrets_file = self.base_path + \
+            self.__client_secrets_filename
+        self.__refresh_token_file = self.base_path + \
+            self.__refresh_token_filename
 
         try:
             with open(self.__client_secrets_file, "r") as file:
