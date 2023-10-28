@@ -25,8 +25,8 @@ class youtube_oauth():
     __refresh_token = {}
     __device_code = ""
     __interval = -1
-    __client_secrets_file = "client_secrets.json"
-    __refresh_token_file = "refresh_token.json"
+    __client_secrets_file = f"{self.base_path}/client_secrets.json"
+    __refresh_token_file = f"{self.base_path}/refresh_token.json"
     __headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json"
@@ -35,6 +35,7 @@ class youtube_oauth():
     ######################
     ### PUBLIC OBJECTS ###
     ######################
+    base_path = os.path.dirname(os.path.realpath(__file__))
     logger = ""
 
     def __init__(self):

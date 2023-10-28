@@ -12,7 +12,7 @@ class youtube_configurator():
     ### PUBLIC OBJECTS ###
     ######################
     base_path = os.path.dirname(os.path.realpath(__file__))
-    conf = f"{base_path}/config.yaml"
+    conf = f"{self.base_path}/config.yaml"
     config = {}
     logger = ""
 
