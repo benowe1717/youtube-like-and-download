@@ -27,17 +27,21 @@ class youtube_api():
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json"
     }
-    __refresh_token_file = "refresh_token.json"
+    __refresh_token_filename = "/refresh_token.json"
+    __refresh_token_file = ""
 
     ######################
     ### PUBLIC OBJECTS ###
     ######################
+    base_path = os.path.dirname(os.path.realpath(__file__))
     logger = ""
     download_path = "~/Videos"
 
     def __init__(self):
         self.logger = logging.getLogger(constants.NAME)
         myauth = youtube_oauth()
+        self.__refresh_token_file = self.base_path + \
+            self.__refresh_token_filename
 
         if not os.path.exists(constants.YTDLP):
             print(f"ERROR: Unable to locate yt-dlp at {constants.YTDLP}")
