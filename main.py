@@ -45,16 +45,18 @@ def main():
         action = myparser.config_action
 
         if action == "add":
+            name = False
+            id = False
             myapi = youtube_api()
             needle = input(
                 "Enter the Youtube Channel Name or URL: "
             )
-            titles = input(
-                "Enter any Titles, separated by comma, that you " +
-                "want to filter for [Leave blank for no filter]: "
-            )
 
-            if "http" in needle:
+            if "watch" in needle or "v=" in needle:
+                url = needle.split("/")
+                id = url[-1].split("=")[-1]
+
+            elif "http" in needle:
                 url = needle.split("/")
                 name = url[-1]
                 if name in constants.YOUTUBE_TABS:
@@ -67,7 +69,19 @@ def main():
             else:
                 name = needle
 
-            id = myapi.get_channel_id(name)
+            if name:
+                channel_data = myapi.get_channel_id(name)
+
+            elif id:
+                channel_data = myapi.get_channel_id_from_video(id)
+
+            id = channel_data[0]
+            name = channel_data[1]
+
+            titles = input(
+                "Enter any Titles, separated by comma, that you " +
+                "want to filter for [Leave blank for no filter]: "
+            )
 
             if titles:
                 title_list = myconf.split_titles(titles)

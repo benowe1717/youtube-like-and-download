@@ -57,7 +57,7 @@ class youtube_api():
 
     def get_channel_id(self, needle):
         channel_id = -1
-        endpoint = f"/youtube/v3/search?part=snippet&maxResults=5&q={needle}"
+        endpoint = f"/youtube/v3/search?part=snippet&maxResults=25&q={needle}"
         url = f"{self.BASE_URL}{endpoint}"
         self.__headers['Authorization'] = f"Bearer {self.__access_token}"
         while channel_id == -1:
@@ -70,25 +70,17 @@ class youtube_api():
                     if i['id']['kind'] == "youtube#channel":
                         if i['snippet']['title'].lower() == needle.lower():
                             channel_id = i['id']['channelId']
-                            return channel_id
-
-                        # TODO --> Add in a partial match feature
-                        # Reference GeminiTayMC vs GeminiTay
-                        # Reference ThatMumboJumbo vs Mumbo Jumbo
-                        # Reference TangoTekLP vs Tango Tek
-
-                if "nextPageToken" in response.keys():
-                    next = response['nextPageToken']
-                    endpoint = f"{endpoint}&nextPageToken={next}"
-                    url = f"{self.BASE_URL}{endpoint}"
-                    print(
-                        "No channels found yet, searching the next page",
-                        f"Search Term: {needle} :: Next Page: {next}"
-                    )
+                            channel_name = i['snippet']['title']
+                            return [channel_id, channel_name]
 
                 else:
                     print(
                         "No more results to search through!"
+                    )
+                    print(
+                        "Please try giving me a link to one of the",
+                        "channel's videos so that I can get the channel",
+                        "information from that!"
                     )
                     break
 
@@ -103,6 +95,30 @@ class youtube_api():
             "Unable to find a YouTube Channel with that name!"
         )
         exit(1)
+
+    def get_channel_id_from_video(self, id):
+        channel_id = -1
+        endpoint = f"/youtube/v3/videos?part=snippet&id={id}&maxResults=25"
+        url = f"{self.BASE_URL}{endpoint}"
+        self.__headers['Authorization'] = f"Bearer {self.__access_token}"
+        while channel_id == -1:
+            r = requests.get(
+                url=url, headers=self.__headers
+            )
+            if r.status_code == 200:
+                response = json.loads(r.text)
+                for i in response['items']:
+                    if i['id'] == id:
+                        channel_id = i['snippet']['channelId']
+                        channel_name = i['snippet']['channelTitle']
+                        return [channel_id, channel_name]
+
+            else:
+                print(
+                    "ERROR: Unable to search for Video ID!",
+                    f"Status Code: {r.status_code} :: Details: {r.text}"
+                )
+                exit(1)
 
     def search_videos(self, id, hours, titles=None):
         self.logger.info(
